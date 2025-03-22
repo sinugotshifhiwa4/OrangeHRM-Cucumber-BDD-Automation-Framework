@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="30">
+    <Properties>
+        <Property name="logBaseDir">logs</Property>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%level] [%t] [%logger{1}] - %msg%n%throwable</Property>
+        <Property name="filePrefix">test</Property>
+        <Property name="maxFileSize">10MB</Property>
+        <Property name="maxBackupFiles">5</Property>
+        <Property name="rolloverInterval">1</Property>
+        <Property name="bufferSize">80000</Property>
+        <Property name="logRetentionDays">30</Property>
+        <Property name="totalSizeLimit">1GB</Property>
+
+        <Property name="debugFilePath">${logBaseDir}/debug/${filePrefix}_debug.log</Property>
+        <Property name="infoFilePath">${logBaseDir}/info/${filePrefix}_info.log</Property>
+        <Property name="warnFilePath">${logBaseDir}/warn/${filePrefix}_warn.log</Property>
+        <Property name="errorFilePath">${logBaseDir}/error/${filePrefix}_error.log</Property>
+
+        <Property name="debugFilePattern">${logBaseDir}/debug/${filePrefix}_debug-%d{yyyy-MM-dd}-%i.log.gz</Property>
+        <Property name="infoFilePattern">${logBaseDir}/info/${filePrefix}_info-%d{yyyy-MM-dd}-%i.log.gz</Property>
+        <Property name="warnFilePattern">${logBaseDir}/warn/${filePrefix}_warn-%d{yyyy-MM-dd}-%i.log.gz</Property>
+        <Property name="errorFilePattern">${logBaseDir}/error/${filePrefix}_error-%d{yyyy-MM-dd}-%i.log.gz</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%highlight{${pattern}}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=white}"/>
+            <Filters>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </Console>
+
+        <!-- Regular log file appends -->
+        <RollingFile name="DebugFile" fileName="${debugFilePath}" filePattern="${debugFilePattern}" advertise="false">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${maxFileSize}"/>
+                <TimeBasedTriggeringPolicy interval="${rolloverInterval}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${maxBackupFiles}">
+                <Delete basePath="${logBaseDir}" maxDepth="2">
+                    <IfFileName glob="debug/${filePrefix}_debug*.log.gz"/>
+                    <IfLastModified age="${logRetentionDays}d"/>
+                    <IfAccumulatedFileSize exceeds="${totalSizeLimit}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <RollingFile name="InfoFile" fileName="${infoFilePath}" filePattern="${infoFilePattern}" advertise="false">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${maxFileSize}"/>
+                <TimeBasedTriggeringPolicy interval="${rolloverInterval}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${maxBackupFiles}">
+                <Delete basePath="${logBaseDir}" maxDepth="2">
+                    <IfFileName glob="info/${filePrefix}_info*.log.gz"/>
+                    <IfLastModified age="${logRetentionDays}d"/>
+                    <IfAccumulatedFileSize exceeds="${totalSizeLimit}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <RollingFile name="WarnFile" fileName="${warnFilePath}" filePattern="${warnFilePattern}" advertise="false">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${maxFileSize}"/>
+                <TimeBasedTriggeringPolicy interval="${rolloverInterval}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${maxBackupFiles}">
+                <Delete basePath="${logBaseDir}" maxDepth="2">
+                    <IfFileName glob="warn/${filePrefix}_warn*.log.gz"/>
+                    <IfLastModified age="${logRetentionDays}d"/>
+                    <IfAccumulatedFileSize exceeds="${totalSizeLimit}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <RollingFile name="ErrorFile" fileName="${errorFilePath}" filePattern="${errorFilePattern}" advertise="false">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${maxFileSize}"/>
+                <TimeBasedTriggeringPolicy interval="${rolloverInterval}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${maxBackupFiles}">
+                <Delete basePath="${logBaseDir}" maxDepth="2">
+                    <IfFileName glob="error/${filePrefix}_error*.log.gz"/>
+                    <IfLastModified age="${logRetentionDays}d"/>
+                    <IfAccumulatedFileSize exceeds="${totalSizeLimit}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+
+        <!-- Async Appends with improved performance settings -->
+        <Async name="AsyncDebug" bufferSize="${bufferSize}">
+            <AppenderRef ref="DebugFile"/>
+        </Async>
+        <Async name="AsyncInfo" bufferSize="${bufferSize}" includeLocation="false">
+            <AppenderRef ref="InfoFile"/>
+        </Async>
+        <Async name="AsyncWarn" bufferSize="${bufferSize}" includeLocation="false">
+            <AppenderRef ref="WarnFile"/>
+        </Async>
+        <Async name="AsyncError" bufferSize="${bufferSize}" includeLocation="true">
+            <AppenderRef ref="ErrorFile"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <!-- Application-specific logger -->
+        <Logger name="com.company" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncDebug"/>
+            <AppenderRef ref="AsyncInfo"/>
+            <AppenderRef ref="AsyncWarn"/>
+            <AppenderRef ref="AsyncError"/>
+        </Logger>
+
+        <!-- Performance-sensitive loggers -->
+        <Logger name="org.hibernate" level="warn" additivity="false">
+            <AppenderRef ref="AsyncWarn"/>
+            <AppenderRef ref="AsyncError"/>
+        </Logger>
+
+        <!-- Security logging -->
+        <Logger name="org.springframework.security" level="info" additivity="false">
+            <AppenderRef ref="AsyncInfo"/>
+            <AppenderRef ref="AsyncWarn"/>
+            <AppenderRef ref="AsyncError"/>
+        </Logger>
+
+        <!-- Root logger -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncDebug"/>
+            <AppenderRef ref="AsyncInfo"/>
+            <AppenderRef ref="AsyncWarn"/>
+            <AppenderRef ref="AsyncError"/>
+        </Root>
+    </Loggers>
+</Configuration>
