@@ -212,21 +212,20 @@
                             <includes>
                                 <include>**/TestRunner.java</include>
                             </includes>
-                            <!-- Use just one approach for consistency -->
-                            <systemPropertyVariables>
-                                <!--suppress UnresolvedMavenProperty -->
-                                <cucumber.filter.tags>@Sanity and not @Ignore</cucumber.filter.tags>
-                            </systemPropertyVariables>
                             <!-- Add useful test execution configurations -->
+                            <systemPropertyVariables>
+                                <cucumber.parallel.count>4</cucumber.parallel.count>
+                            </systemPropertyVariables>
                             <reportsDirectory>${project.build.directory}/surefire-reports-uat</reportsDirectory>
-                            <parallel>methods</parallel>
-                            <threadCount>4</threadCount>
+                            <!-- Creates one JVM process per CPU core for test execution -->
                             <forkCount>1C</forkCount>
+                            <!-- Uses an isolated class loader instead of system class loader to prevent classpath conflicts -->
+                            <useSystemClassLoader>false
+                            </useSystemClassLoader>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-
 </project>
