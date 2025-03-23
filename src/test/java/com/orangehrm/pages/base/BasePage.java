@@ -434,6 +434,33 @@ public class BasePage {
         }
     }
 
+    /**
+     * Captures a screenshot directly as bytes.
+     *
+     * @param screenshotName Base name for the screenshot
+     * @return Byte array containing the screenshot image data
+     */
+    public byte[] captureScreenshotAsBytes(String screenshotName) {
+        try {
+            // Log the screenshot capture attempt
+            logger.info("Capturing screenshot as bytes: {}", screenshotName);
+
+            // Capture screenshot directly as bytes
+            byte[] screenshotBytes = ((TakesScreenshot) driverFactory.getDriver())
+                    .getScreenshotAs(OutputType.BYTES);
+
+            // Log successful capture
+            logger.info("Successfully captured screenshot: {} ({} bytes)",
+                    screenshotName, screenshotBytes.length);
+
+            return screenshotBytes;
+        } catch (Exception error) {
+            ErrorHandler.logError(error, "captureScreenshotAsBytes",
+                    "Failed to capture screenshot as bytes: " + screenshotName);
+            throw new RuntimeException("Error capturing screenshot as bytes: " + screenshotName, error);
+        }
+    }
+
     private String saveScreenshot(Path destinationPath, File screenshot) throws IOException {
         try {
             // Ensure the directory exists before saving the screenshot

@@ -28,6 +28,15 @@ public class ImplicitWaitUtils {
         }
     }
 
+    public static void applyImplicitWait(WebDriver driver, Duration timeout) {
+        try {
+            driver.manage().timeouts().implicitlyWait(timeout);
+        } catch (Exception error) {
+            ErrorHandler.logError(error, "applyImplicitWait", "Failed to apply implicit wait time");
+            throw error;
+        }
+    }
+
     public static void applyImplicitWait() {
         applyImplicitWait(DriverFactory.getInstance().getDriver());
     }

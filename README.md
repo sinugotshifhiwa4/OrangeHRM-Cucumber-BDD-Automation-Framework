@@ -39,7 +39,7 @@ After completing these steps, you are ready to run the tests.
 ## Running Tests
 To execute tests in the UAT environment, use the following command:
 ```sh
-mvn clean test -Denv=uat
+mvn clean test -Puat-sanity -Denv=uat
 ```
 
 ## Test Approach

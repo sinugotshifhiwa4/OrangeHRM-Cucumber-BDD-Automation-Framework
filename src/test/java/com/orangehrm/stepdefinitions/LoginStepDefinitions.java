@@ -1,7 +1,6 @@
 package com.orangehrm.stepdefinitions;
 
 import com.orangehrm.hooks.TestBase;
-import com.orangehrm.pages.base.BasePage;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

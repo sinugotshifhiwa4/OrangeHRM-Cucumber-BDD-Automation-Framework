@@ -6,8 +6,6 @@ import com.orangehrm.utils.ErrorHandler;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import javax.crypto.SecretKey;
-import javax.naming.ConfigurationException;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

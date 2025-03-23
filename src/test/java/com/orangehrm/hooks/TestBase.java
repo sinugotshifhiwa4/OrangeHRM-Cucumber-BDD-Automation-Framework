@@ -14,15 +14,13 @@ import com.orangehrm.utils.ErrorHandler;
 import com.orangehrm.utils.LoggerUtils;
 import com.orangehrm.utils.constants.Encryption;
 import com.orangehrm.utils.constants.GlobalConstants;
-import io.cucumber.java.After;
-import io.cucumber.java.AfterAll;
-import io.cucumber.java.Before;
-import io.cucumber.java.BeforeAll;
+import io.cucumber.java.*;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TestBase extends BasePage {
@@ -61,6 +59,45 @@ public class TestBase extends BasePage {
         } catch (Exception error) {
             ErrorHandler.logError(error, "setup", "Failed to setup");
             throw error;
+        }
+    }
+
+    /**
+     * AfterStep hook that captures and attaches a screenshot to the Cucumber scenario.
+     * Captures screenshots only for failed scenarios to optimize test execution.
+     * Utilizes direct byte capture for performance efficiency.
+     */
+    @AfterStep
+    public void captureAndAttachFailureScreenshot(Scenario scenario) {
+
+        // Skip screenshot capture if the scenario passed
+        if (!scenario.isFailed()) {
+            return;
+        }
+
+        String scenarioName = sanitizeScenarioName(scenario.getName());
+        String timestamp = getCurrentTimestamp();
+        String screenshotName = String.format("%s_FAILED_%s", scenarioName, timestamp);
+
+        logger.info("Capturing failure screenshot for scenario: {}", scenario.getName());
+
+        try {
+            byte[] screenshotBytes = captureScreenshotAsBytes(screenshotName);
+
+            if (screenshotBytes == null || screenshotBytes.length == 0) {
+                logger.warn("Screenshot capture returned empty bytes for scenario: {}", scenario.getName());
+                return;
+            }
+
+            scenario.attach(screenshotBytes, "image/png", screenshotName);
+            logger.info("Successfully attached failure screenshot: {}", screenshotName);
+
+        } catch (WebDriverException error) {
+            ErrorHandler.logError(error, "captureScenarioScreenshot",
+                    "WebDriver failed to capture screenshot for scenario: " + scenario.getName());
+        } catch (Exception error) {
+            ErrorHandler.logError(error, "captureScenarioScreenshot",
+                    "Failed to capture or attach screenshot for scenario: " + scenario.getName());
         }
     }
 
@@ -147,5 +184,31 @@ public class TestBase extends BasePage {
             ErrorHandler.logError(error, "decryptionCredentials", "Failed to decrypt credentials");
             throw error;
         }
+    }
+
+    /**
+     * Generates a formatted timestamp for consistent filename usage.
+     *
+     * @return A string representation of the current timestamp.
+     */
+    private String getCurrentTimestamp() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+    }
+
+    /**
+     * Sanitizes scenario name for safe filename usage.
+     *
+     * @param name The original scenario name.
+     * @return A sanitized version safe for filenames.
+     */
+    private String sanitizeScenarioName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return "unnamed_scenario";
+        }
+
+        return name.trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-zA-Z0-9_-]", "")
+                .substring(0, Math.min(name.length(), 100)); // Limit length to avoid filesystem issues
     }
 }

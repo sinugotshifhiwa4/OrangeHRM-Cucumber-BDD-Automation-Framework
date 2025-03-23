@@ -7,9 +7,10 @@ import org.junit.platform.suite.api.Suite;
 
 import static io.cucumber.junit.platform.engine.Constants.*;
 
+
 /**
  * TestRunner class for executing Cucumber tests.
- *
+ * <p>
  * This class is configured to:
  * - Execute as a JUnit platform test suite
  * - Use only the Cucumber test engine
@@ -26,7 +27,7 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, html:target/cucumber-reports/report.html, json:target/cucumber-reports/report.json")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.orangehrm.stepdefinitions,com.orangehrm.hooks")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.orangehrm.stepdefinitions, com.orangehrm.hooks")
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@Sanity and not @Ignore")
 @ConfigurationParameter(key = PARALLEL_EXECUTION_ENABLED_PROPERTY_NAME, value = "true")
 @ConfigurationParameter(key = PARALLEL_CONFIG_STRATEGY_PROPERTY_NAME, value = "dynamic")
